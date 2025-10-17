@@ -1,14 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
 </head>
+
 <body>
     <h1>Land_Price_Predictor</h1>
     <form action="/Predict" method="POST">
-        <input type="text" name="" id="">
+        <label for="lat">Latitude</label>
+        <input type="text" name="lat" id="lat">
+        <label for="lon">Longitude</label>
+        <input type="text" name="lon" id="lon">
+        <label for="pop">Population Range:</label>
+        <select name="pop" id="pop">
+            <option value="">Select</option>
+            {% for range in pop_ranges %}
+    <option value="{{ range }}">{{ range }}</option>
+  {% endfor %}
+</select>
+        </select>
+        <label for="ocean_proximity">Ocean Proximity</label>
+        <select name="ocean_proximity" id="ocean_proximity">
+            <option value="">Select</option>
+            <option value="NEAR BAY">Near Bay</option>
+            <option value="NEAR OCEAN">Near Ocean</option>
+            <option value="INLAND">Inland</option>
+            <option value="ISLAND">Island</option>
+            <option value="&lt;1H OCEAN">&lt;1H OCEAN</option>
+        </select>
+        <button type="submit"> Predict </button>
+
     </form>
 </body>
+
 </html>
