@@ -1,17 +1,31 @@
+import os
 import pandas as pd
-import numpy as np 
+import numpy as np
 import joblib
 
-def predict_price(lat,lon,po_range,ocean_proxi):
-    model = joblib.load('/media/prince/5A4E832F4E83034D/testing /traning the model/model.pkl')
-    pipline = joblib.load('/media/prince/5A4E832F4E83034D/testing /traning the model/pipeline.pkl')
+def predict_price(lat, lon, pop_range, ocean_proxi):
+    base = os.path.dirname(__file__)
+    model_path = os.path.join(base, "model.pkl")
+    pipeline_path = os.path.join(base, "pipline.pkl")
+
+    model = joblib.load(model_path)
+    pipeline = joblib.load(pipeline_path)
+
     data = pd.DataFrame({
-    'latitude': [lat],
-    'longitude': [lon],
-    'population': [po_range],
-    'ocean_proximity': [ocean_proxi]
+        'latitude': [lat],
+        'longitude': [lon],
+        'population_range': [pop_range],
+        'ocean_proximity': [ocean_proxi]
     })
-    transformed_data = pipline.transfomr(data)
-    prediction = model.predict(transformed_data)
-    data['land_value'] = prediction
-    return data['land_value']
+
+    transformed = pipeline.transform(data)
+
+    if hasattr(transformed, "toarray"):
+        transformed = transformed.toarray()
+
+    transformed = np.array(transformed, dtype=float).reshape(1, -1)
+
+    prediction = model.predict(transformed)
+
+    # flatten in case model returns [[value]] or [value]
+    return float(np.ravel(prediction)[0])

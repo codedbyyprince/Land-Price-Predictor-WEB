@@ -10,17 +10,21 @@ population_ranges = np.array([
 
 @app.route('/')
 def home():
-    return render_template('home.html', pop_ranges = population_ranges)
+    return render_template('home.html', pop_ranges=population_ranges, result=None)
 
-@app.route('/predict', methods=['POST', 'GET'])
+@app.route('/predict', methods=['POST'])
 def predict():
-    lat = request.form.get('lat')
-    lon = request.form.get('lon')
+    lat = request.form.get('lat', '')
+    lon = request.form.get('lon', '')
     pop_range = request.form.get('pop')
     ocean_proxi = request.form.get('ocean_proximity')
-    result = predict_price(lat, lon, pop_range, ocean_proxi)
-    return render_template('predict.html', result=result)
-
+    lat_f = float(lat)
+    lon_f = float(lon)
+    pop_range = str(pop_range)
+    ocean_proxi = str(ocean_proxi)
+    # call prediction function (it will convert types)
+    result = predict_price(lat_f, lon_f, pop_range, ocean_proxi)
+    return render_template('home.html', pop_ranges=population_ranges, result=result)
 
 
 if __name__ == '__main__':
