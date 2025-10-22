@@ -2,42 +2,253 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Land Price Predictor</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin="" />
+
+  <style>
+    /* === GLOBAL THEME === */
+    :root {
+      --bg-dark: #0a0f1a;
+      --card-bg: rgba(25, 40, 70, 0.7);
+      --accent: #3fa9f5;
+      --accent-light: #67c5ff;
+      --text-light: #e6f1ff;
+      --shadow-glow: 0 0 20px rgba(63, 169, 245, 0.5);
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: radial-gradient(circle at 20% 20%, #0d1b2a, #000814);
+      color: var(--text-light);
+      text-align: center;
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s ease-in-out;
+    }
+
+    h1 {
+      margin-top: 25px;
+      font-size: 32px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: glowTitle 2.5s infinite alternate ease-in-out;
+    }
+
+    @keyframes glowTitle {
+      from {
+        text-shadow: 0 0 10px #00b4d8;
+      }
+
+      to {
+        text-shadow: 0 0 20px #0077b6;
+      }
+    }
+
+    /* === FORM CARD === */
+    form {
+      background: var(--card-bg);
+      backdrop-filter: blur(8px);
+      border-radius: 12px;
+      width: 65%;
+      margin: 30px auto;
+      padding: 20px;
+      box-shadow: var(--shadow-glow);
+      transition: transform 0.3s ease;
+    }
+
+    form:hover {
+      transform: scale(1.02);
+    }
+
+    label {
+      display: inline-block;
+      margin: 10px 5px 4px;
+      font-weight: 600;
+      color: #a8c7fa;
+    }
+
+    input,
+    select {
+      padding: 7px 10px;
+      border-radius: 8px;
+      border: 1px solid #1b3a68;
+      outline: none;
+      background: rgba(0, 0, 30, 0.6);
+      color: var(--text-light);
+      transition: all 0.3s;
+      font-size: 14px;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 10px rgba(63, 169, 245, 0.4);
+    }
+
+    button {
+      margin-top: 15px;
+      background: linear-gradient(90deg, #0077b6, #00b4d8);
+      color: white;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+      box-shadow: 0 0 12px rgba(0, 119, 182, 0.4);
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #00b4d8, #48cae4);
+      box-shadow: 0 0 18px rgba(0, 180, 216, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* === MAP === */
+    #map {
+      height: 500px;
+      width: 80%;
+      margin: 35px auto;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 0 25px rgba(63, 169, 245, 0.3);
+      transition: box-shadow 0.3s ease;
+    }
+
+    #map:hover {
+      box-shadow: 0 0 35px rgba(0, 180, 255, 0.5);
+    }
+
+    .leaflet-popup-content {
+      color: #000;
+      font-weight: bold;
+    }
+
+    h2 {
+      color: #67c5ff;
+      font-weight: 500;
+      margin-top: 15px;
+    }
+
+    .result-box {
+      background: rgba(30, 60, 100, 0.5);
+      padding: 10px;
+      border-radius: 8px;
+      width: fit-content;
+      margin: 10px auto;
+      box-shadow: var(--shadow-glow);
+    }
+    
+  </style>
 </head>
 
 <body>
-    <h1>Land_Price_Predictor</h1>
-    <form action="/predict" method="POST">
-        <label for="lat">Latitude</label>
-        <input type="text" name="lat" id="lat">
-        <label for="lon">Longitude</label>
-        <input type="text" name="lon" id="lon">
-        <label for="pop">Population Range:</label>
-        <select name="pop" id="pop">
-            <option value="">Select</option>
-            {% for range in pop_ranges %}
-                <option value="{{ range }}">{{ range }}</option>
-            {% endfor %}
-        </select>
-        <label for="ocean_proximity">Ocean Proximity</label>
-        <select name="ocean_proximity" id="ocean_proximity">
-            <option value="">Select</option>
-            <option value="NEAR BAY">Near Bay</option>
-            <option value="NEAR OCEAN">Near Ocean</option>
-            <option value="INLAND">Inland</option>
-            <option value="ISLAND">Island</option>
-            <option value="&lt;1H OCEAN">&lt;1H OCEAN</option>
-        </select>
-        <button type="submit"> Predict </button>
-    </form>
+  <h1>🌍 Land Price Predictor</h1>
 
-    <h2>Prediction</h2>
-    {% if result is not none %}
-        <div>{{ result|round(2) }}</div>
-    {% endif %}
+  <form action="/predict" method="POST">
+    <label for="lat">Latitude</label>
+    <input type="text" name="lat" id="lat" readonly>
 
+    <label for="lon">Longitude</label>
+    <input type="text" name="lon" id="lon" readonly>
+
+    <label for="pop">Population Range:</label>
+    <select name="pop" id="pop">
+      <option value="">Select</option>
+      {% for range in pop_ranges %}
+      <option value="{{ range }}">{{ range }}</option>
+      {% endfor %}
+    </select>
+
+    <label for="ocean_proximity">Ocean Proximity</label>
+    <select name="ocean_proximity" id="ocean_proximity">
+      <option value="">Select</option>
+      <option value="NEAR BAY">Near Bay</option>
+      <option value="NEAR OCEAN">Near Ocean</option>
+      <option value="INLAND">Inland</option>
+      <option value="ISLAND">Island</option>
+      <option value="&lt;1H OCEAN">&lt;1H OCEAN</option>
+    </select>
+
+    <br>
+    <button type="submit">Predict</button>
+  </form>
+
+  <h2>Prediction</h2>
+  {% if result is not none %}
+  <div class="result-box">{{ result|round(2) }}</div>
+  {% endif %}
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const map = L.map('map', {
+        zoomSnap: 0.1,
+        zoomDelta: 0.2
+      }).setView([37.25, -119.5], 6);
+
+      // Blue-tinted map theme
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 10,
+        minZoom: 5,
+        attribution: '&copy; <a href="https://carto.com/">CartoDB</a>'
+      }).addTo(map);
+
+      let marker = null;
+
+      const californiaBounds = [
+        [32.54, -124.35],
+        [42.00, -114.31]
+      ];
+
+      const rect = L.rectangle(californiaBounds, {
+        color: "#00b4d8",
+        weight: 2,
+        fillOpacity: 0.08
+      }).addTo(map);
+
+      map.fitBounds(californiaBounds);
+
+      map.on('click', function (e) {
+        const lat = e.latlng.lat;
+        const lon = e.latlng.lng;
+
+        if (
+          lat >= 32.54 && lat <= 42.00 &&
+          lon >= -124.35 && lon <= -114.31
+        ) {
+          const latFixed = lat.toFixed(4);
+          const lonFixed = lon.toFixed(4);
+
+          document.getElementById('lat').value = latFixed;
+          document.getElementById('lon').value = lonFixed;
+
+          if (marker) map.removeLayer(marker);
+
+          marker = L.marker([lat, lon], {
+            riseOnHover: true
+          }).addTo(map)
+            .bindPopup(`<b>Latitude:</b> ${latFixed}<br><b>Longitude:</b> ${lonFixed}`)
+            .openPopup();
+        } else {
+          alert("⚠️ Please click inside the California region.");
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

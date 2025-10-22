@@ -1,6 +1,7 @@
+from flask import Flask, render_template, request
 import numpy as np
-from flask import Flask, render_template, redirect, url_for, request
 from functions import predict_price
+
 app = Flask(__name__)
 
 population_ranges = np.array([
@@ -14,18 +15,13 @@ def home():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    lat = request.form.get('lat', '')
-    lon = request.form.get('lon', '')
-    pop_range = request.form.get('pop')
-    ocean_proxi = request.form.get('ocean_proximity')
-    lat_f = float(lat)
-    lon_f = float(lon)
-    pop_range = str(pop_range)
-    ocean_proxi = str(ocean_proxi)
-    # call prediction function (it will convert types)
-    result = predict_price(lat_f, lon_f, pop_range, ocean_proxi)
-    return render_template('home.html', pop_ranges=population_ranges, result=result)
+    lat = float(request.form.get('lat', 0))
+    lon = float(request.form.get('lon', 0))
+    pop_range = request.form.get('pop', '')
+    ocean_proxi = request.form.get('ocean_proximity', '')
 
+    result = predict_price(lat, lon, pop_range, ocean_proxi)
+    return render_template('home.html', pop_ranges=population_ranges, result=result)
 
 if __name__ == '__main__':
     app.run(debug=True)
